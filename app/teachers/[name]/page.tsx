@@ -25,21 +25,26 @@ function fixDriveLink(url: string) {
 export default async function TeacherPage({
   params,
 }: {
-  params: { name: string }
+  params: Promise<{ name: string }>
 }) {
+  const { name } = await params
+
   const submissions = await getSubmissions()
 
-  const teacherName = decodeURIComponent(
-    params.name
-  )
+  const teacherName =
+    decodeURIComponent(name)
 
-  const teacherSubmissions = submissions.filter(
-    (item: any) =>
-      item["Teacher Name"]
+  const teacherSubmissions =
+    submissions.filter((item: any) => {
+      const slug = item[
+        "Teacher Name"
+      ]
         ?.toLowerCase()
-        .replace(/\s+/g, "-") ===
-      teacherName.toLowerCase()
-  )
+        .replace(/\s+/g, "-")
+
+      return slug ===
+        teacherName.toLowerCase()
+    })
 
   return (
     <div>
@@ -65,13 +70,15 @@ export default async function TeacherPage({
                 className="bg-white p-8 rounded-2xl shadow"
               >
                 <div className="flex justify-between mb-4">
+
                   <div>
                     <p className="font-semibold">
                       {item["Submission Type"]}
                     </p>
 
                     <p className="text-gray-500">
-                      Observer:{" "}
+                      Observer:
+                      {" "}
                       {item["Observer"]}
                     </p>
                   </div>
@@ -81,6 +88,7 @@ export default async function TeacherPage({
                       item["Timestamp"]
                     ).toLocaleDateString()}
                   </p>
+
                 </div>
 
                 <p className="whitespace-pre-line text-gray-700 mb-6">
@@ -95,6 +103,7 @@ export default async function TeacherPage({
                 >
                   Open PDF / Reflection
                 </a>
+
               </div>
             )
           }

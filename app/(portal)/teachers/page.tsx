@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 
 export default function TeachersPage() {
+  const { data: session } = useSession()
+
   const [teachers, setTeachers] = useState<any[]>([])
   const [search, setSearch] = useState("")
 
@@ -15,9 +18,21 @@ export default function TeachersPage() {
 
       const submissions = await res.json()
 
+      let filteredSubmissions = submissions
+
+      // 👨‍🏫 Teacher personalization
+      if (session?.user?.role === "teacher") {
+        filteredSubmissions =
+          submissions.filter(
+            (item: any) =>
+              item["Teacher Name"] ===
+              session.user.name
+          )
+      }
+
       const uniqueTeachers = Array.from(
         new Set(
-          submissions.map(
+          filteredSubmissions.map(
             (item: any) => item["Teacher Name"]
           )
         )
@@ -26,7 +41,7 @@ export default function TeachersPage() {
       const teacherData = uniqueTeachers.map(
         (teacher: any) => {
           const teacherSubmissions =
-            submissions.filter(
+            filteredSubmissions.filter(
               (item: any) =>
                 item["Teacher Name"] === teacher
             )
@@ -49,7 +64,7 @@ export default function TeachersPage() {
     }
 
     fetchData()
-  }, [])
+  }, [session])
 
   const filteredTeachers = teachers.filter(
     (item: any) =>
@@ -64,7 +79,6 @@ export default function TeachersPage() {
         Teachers
       </h1>
 
-      {/* Search */}
       <input
         type="text"
         placeholder="Search teacher..."
@@ -94,24 +108,20 @@ export default function TeachersPage() {
                 href={`/teachers/${slug}`}
                 className="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition"
               >
-                {/* Avatar */}
                 <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-xl font-bold mb-4">
                   {initials}
                 </div>
 
-                {/* Name */}
                 <h2 className="text-2xl font-bold mb-2">
                   {item.teacher}
                 </h2>
 
-                {/* Statistics */}
                 <p className="text-gray-600 mb-1">
                   Submissions:
                   {" "}
                   {item.submissionsCount}
                 </p>
 
-                {/* Latest Activity */}
                 <p className="text-sm text-gray-400">
                   Latest:
                   {" "}

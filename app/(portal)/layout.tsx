@@ -10,7 +10,7 @@ import {
 
 function Sidebar() {
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const { data: session } = useSession() as any
   const role = session?.user?.role
 
   const links = [

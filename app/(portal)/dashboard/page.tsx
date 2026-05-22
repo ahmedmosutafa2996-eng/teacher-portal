@@ -7,7 +7,7 @@ const UPLOADS_API =
   "https://script.google.com/macros/s/AKfycbwjbCWb2CbwJVlsxdxs2fLlZ7Nag3stJfVEKS9WWVkhp7if1ZfeASXoHmfJ6YPOAEnPDw/exec"
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const { data: session } = useSession() as any
   const [submissions, setSubmissions] = useState<any[]>([])
   const [error, setError] = useState("")
 

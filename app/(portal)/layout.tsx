@@ -8,10 +8,78 @@ import {
   useSession,
 } from "next-auth/react"
 
+function normalizeRole(role: string) {
+  return String(role || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+}
+
 function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession() as any
-  const role = session?.user?.role
+
+  const role = normalizeRole(session?.user?.role)
+  const userName = session?.user?.name
+
+  const isTeacher = role === "teacher"
+  const isTeamLeader =
+    role === "team_leader" ||
+    userName === "Ahmed Mostafa"
+
+  const isAcademicSupervisor =
+    role === "academic_supervisor" ||
+    userName === "Khaled Magdy"
+
+  const isBranchManager =
+    role === "branch_manager"
+
+  const isAdmin =
+    role === "admin"
+
+  const canSeeTeachers =
+    isTeamLeader ||
+    isAcademicSupervisor ||
+    isBranchManager ||
+    isAdmin
+
+  const canSeeSubmissions =
+    isTeacher ||
+    isTeamLeader ||
+    isAcademicSupervisor
+
+  const canSubmitTeacherUpload =
+    isTeacher ||
+    isTeamLeader
+
+  const canSubmitManagement =
+    isTeamLeader ||
+    isAcademicSupervisor
+
+  const canSeeAnalytics =
+    isTeamLeader ||
+    isAcademicSupervisor ||
+    isBranchManager ||
+    isAdmin ||
+    isTeacher
+
+  const canSubmitScorecard =
+    isTeacher ||
+    isTeamLeader
+
+  const canManageSchedule =
+    isTeamLeader ||
+    isAcademicSupervisor
+
+  const canSeeFailedStudents =
+    isTeamLeader ||
+    isAcademicSupervisor ||
+    isBranchManager ||
+    isAdmin
+
+  const canSubmitFailedStudent =
+    isTeacher ||
+    isTeamLeader
 
   const links = [
     {
@@ -19,7 +87,7 @@ function Sidebar() {
       label: "Dashboard",
     },
 
-    ...(role !== "teacher"
+    ...(canSeeTeachers
       ? [
           {
             href: "/teachers",
@@ -28,17 +96,25 @@ function Sidebar() {
         ]
       : []),
 
-    {
-      href: "/submissions",
-      label: "Submissions",
-    },
+    ...(canSeeSubmissions
+      ? [
+          {
+            href: "/submissions",
+            label: "Submissions",
+          },
+        ]
+      : []),
 
-    {
-      href: "/submit",
-      label: "Submit",
-    },
+    ...(canSubmitTeacherUpload
+      ? [
+          {
+            href: "/submit",
+            label: "Submit",
+          },
+        ]
+      : []),
 
-    ...(role !== "teacher"
+    ...(canSubmitManagement
       ? [
           {
             href: "/management-submit",
@@ -47,10 +123,14 @@ function Sidebar() {
         ]
       : []),
 
-    {
-      href: "/analytics",
-      label: "Analytics",
-    },
+    ...(canSeeAnalytics
+      ? [
+          {
+            href: "/analytics",
+            label: "Analytics",
+          },
+        ]
+      : []),
 
     {
       href: "/resources",
@@ -58,9 +138,50 @@ function Sidebar() {
     },
 
     {
+      href: "/scorecards",
+      label: "Scorecards",
+    },
+
+    ...(canSubmitScorecard
+      ? [
+          {
+            href: "/scorecard-submit",
+            label: "Submit Scorecard",
+          },
+        ]
+      : []),
+
+    {
       href: "/schedule",
       label: "Schedule",
     },
+
+    ...(canManageSchedule
+      ? [
+          {
+            href: "/schedule-management",
+            label: "Schedule Management",
+          },
+        ]
+      : []),
+
+    ...(canSubmitFailedStudent
+      ? [
+          {
+            href: "/failed-students-submit",
+            label: "Submit Failed Student",
+          },
+        ]
+      : []),
+
+    ...(canSeeFailedStudents
+      ? [
+          {
+            href: "/failed-students",
+            label: "Failed Students",
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -104,10 +225,7 @@ function Sidebar() {
         </p>
 
         <p className="text-gray-400 text-sm capitalize mb-4">
-          {session?.user?.role?.replace(
-            /_/g,
-            " "
-          )}
+          {role.replace(/_/g, " ")}
         </p>
 
         <button
